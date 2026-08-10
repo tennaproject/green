@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  }
+}
