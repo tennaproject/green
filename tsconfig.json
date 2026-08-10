@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "types": ["bun"],
+    "types": ["bun", "node"],
     "strict": true,
     "module": "Preserve",
     "moduleResolution": "Bundler",
     "target": "ESNext",
     "noEmit": true
   },
-  "include": ["server.ts", "script.js", "sign-renderer.js"]
+  "include": ["server.ts", "scripts/build.ts", "script.js", "sign-renderer.js"]
 }
