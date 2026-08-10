@@ -150,6 +150,38 @@ textarea:focus-visible {
   gap: 0.5rem;
 }
 
+.pixel-export-option {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  gap: 0.5rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--paper-highlight);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.pixel-export-option:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+  border-color: var(--text);
+}
+
+.pixel-export-option:has(input:focus-visible) {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.pixel-export-option input {
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
 .toolbar-button {
   border: 1px solid var(--line);
   cursor: pointer;

@@ -1,6 +1,7 @@
 import { paintSign, renderSign } from "./sign-renderer.js";
 
 const DEFAULT_TEXT = 'Write something green...';
+const ART_PIXEL_SIZE = 3;
 
 function formatGreenSansText(text) {
   return text.replaceAll(" ", "  ");
@@ -16,6 +17,7 @@ const elements = {
   signCanvas: document.querySelector("#sign-canvas"),
   signCopy: document.querySelector("#sign-copy"),
   character: document.querySelector("#character-sprite"),
+  pixelExport: document.querySelector("#pixel-export"),
   sideButton: document.querySelector("#side-button"),
   sideButtonLabel: document.querySelector("#side-button-label"),
   resetButton: document.querySelector("#reset-button"),
@@ -126,13 +128,12 @@ function rasterizeCharacter() {
   return canvas;
 }
 
-async function createExportCanvas() {
+async function createExportCanvas(scale = 2) {
   await document.fonts.ready;
   updateSign();
   await elements.character.decode().catch(() => {});
   await new Promise((resolve) => requestAnimationFrame(resolve));
 
-  const scale = 2;
   const exportPadding = 8;
   const sceneRect = elements.scene.getBoundingClientRect();
   const inversePreviewScale = 1 / Math.max(previewScale, 0.001);
@@ -161,22 +162,37 @@ async function createExportCanvas() {
   const contentTop = Math.min(signRect.top, characterRect.top);
   const contentRight = Math.max(signRect.right, characterRect.right);
   const contentBottom = Math.max(signRect.bottom, characterRect.bottom);
-  const signX = signRect.left - contentLeft + exportPadding;
-  const signY = signRect.top - contentTop + exportPadding;
+  const snap = (value) => Math.round(value * scale) / scale;
+  const signX = snap(signRect.left - contentLeft + exportPadding);
+  const signY = snap(signRect.top - contentTop + exportPadding);
   const canvas = document.createElement("canvas");
   canvas.width = Math.ceil((contentRight - contentLeft + exportPadding * 2) * scale);
   canvas.height = Math.ceil((contentBottom - contentTop + exportPadding * 2) * scale);
 
   const context = canvas.getContext("2d");
   context.scale(scale, scale);
-  paintSign(context, signX, signY, signRect.width, signRect.height);
+  if (scale < 1) {
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    paintSign(
+      context,
+      Math.round(signX * scale),
+      Math.round(signY * scale),
+      Math.round(signRect.width * scale),
+      Math.round(signRect.height * scale),
+      1,
+    );
+    context.restore();
+  } else {
+    paintSign(context, signX, signY, signRect.width, signRect.height);
+  }
 
   const value = formatGreenSansText(elements.text.value);
   if (value) {
     const fontSize = Number.parseFloat(copyStyle.fontSize) || 32;
     const lineHeight = Number.parseFloat(copyStyle.lineHeight) || fontSize * 1.36;
-    const copyX = copyRect.left - contentLeft + exportPadding;
-    const copyY = copyRect.top - contentTop + exportPadding;
+    const copyX = snap(copyRect.left - contentLeft + exportPadding);
+    const copyY = snap(copyRect.top - contentTop + exportPadding);
     context.fillStyle = copyStyle.color;
     context.font = `${copyStyle.fontWeight} ${fontSize}px ${copyStyle.fontFamily}`;
     context.textBaseline = "top";
@@ -186,12 +202,21 @@ async function createExportCanvas() {
   }
 
   if (elements.character.complete && elements.character.naturalWidth) {
-    const snap = (value) => Math.round(value * scale) / scale;
-    const characterX = snap(characterRect.left - contentLeft + exportPadding);
+    let characterX = snap(characterRect.left - contentLeft + exportPadding);
     const characterY = snap(characterRect.top - contentTop + exportPadding);
-    const characterWidth = snap(characterRect.width);
-    const characterHeight = snap(characterRect.height);
+    let characterWidth = snap(characterRect.width);
+    let characterHeight = snap(characterRect.height);
     const characterBitmap = rasterizeCharacter();
+
+    if (scale < 1) {
+      const originalWidth = characterWidth;
+      characterWidth = characterBitmap.width / scale;
+      characterHeight = characterBitmap.height / scale;
+      if (characterSide === "left") {
+        characterX += originalWidth - characterWidth;
+      }
+    }
+
     context.imageSmoothingEnabled = false;
     context.save();
     if (characterSide === "right") {
@@ -219,7 +244,9 @@ async function downloadSign() {
   elements.downloadButton.querySelector("span").textContent = "Preparing…";
 
   try {
-    const canvas = await createExportCanvas();
+    const nativePixels = elements.pixelExport.checked;
+    const scale = nativePixels ? 1 / ART_PIXEL_SIZE : 2;
+    const canvas = await createExportCanvas(scale);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
     if (!blob) throw new Error("PNG creation failed");
 
@@ -227,7 +254,8 @@ async function downloadSign() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `green-sign-${timestamp}.png`;
+    const sizeSuffix = nativePixels ? "-native" : "";
+    link.download = `green-sign${sizeSuffix}-${timestamp}.png`;
     link.click();
     URL.revokeObjectURL(url);
   } catch (error) {

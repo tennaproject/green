@@ -55,10 +55,11 @@ function paintVerticalDetails(context, pattern, x, y, height, unit) {
   });
 }
 
-export function paintSign(context, x, y, width, height) {
-  const safeWidth = Math.max(3, Math.round(width));
-  const safeHeight = Math.max(3, Math.round(height));
-  const unit = BORDER_UNIT;
+export function paintSign(context, x, y, width, height, unit = BORDER_UNIT) {
+  const safeUnit = Math.max(1, Math.round(unit));
+  const safeWidth = Math.max(safeUnit, Math.round(width));
+  const safeHeight = Math.max(safeUnit, Math.round(height));
+  unit = safeUnit;
   const right = x + safeWidth - unit;
   const bottom = y + safeHeight - unit;
 
