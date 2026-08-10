@@ -97,7 +97,7 @@ button {
   flex-direction: column;
   align-items: stretch;
   align-self: center;
-  inline-size: min(44rem, calc(100% - 2rem));
+  inline-size: min(50rem, calc(100% - 2rem));
   gap: 0.5rem;
   margin-block-start: 1rem;
 }
@@ -145,6 +145,7 @@ textarea:focus-visible {
 .compact-actions {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: stretch;
   justify-content: flex-end;
   gap: 0.5rem;
@@ -242,6 +243,10 @@ textarea:focus-visible {
 
 #reset-button {
   --icon: url("assets/icons/reload.svg");
+}
+
+#copy-button {
+  --icon: url("assets/icons/copy.svg");
 }
 
 #download-button {

@@ -21,6 +21,7 @@ const elements = {
   sideButton: document.querySelector("#side-button"),
   sideButtonLabel: document.querySelector("#side-button-label"),
   resetButton: document.querySelector("#reset-button"),
+  copyButton: document.querySelector("#copy-button"),
   downloadButton: document.querySelector("#download-button"),
 };
 
@@ -238,6 +239,34 @@ async function createExportCanvas(scale = 2) {
   return canvas;
 }
 
+async function clipboardPng() {
+  const nativePixels = elements.pixelExport.checked;
+  const canvas = await createExportCanvas(nativePixels ? 1 / ART_PIXEL_SIZE : 2);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("PNG creation failed");
+  return blob;
+}
+
+async function copySign() {
+  const label = elements.copyButton.querySelector("span");
+  const originalLabel = label.textContent;
+  elements.copyButton.disabled = true;
+  label.textContent = "Copying…";
+
+  try {
+    const item = new ClipboardItem({ "image/png": clipboardPng() });
+    await navigator.clipboard.write([item]);
+    label.textContent = "Copied";
+  } catch (error) {
+    console.error(error);
+    label.textContent = "Copy failed";
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  elements.copyButton.disabled = false;
+  label.textContent = originalLabel;
+}
+
 async function downloadSign() {
   const originalLabel = elements.downloadButton.querySelector("span").textContent;
   elements.downloadButton.disabled = true;
@@ -269,6 +298,7 @@ async function downloadSign() {
 elements.text.addEventListener("input", updateSign);
 elements.sideButton.addEventListener("click", toggleCharacterSide);
 elements.resetButton.addEventListener("click", resetSign);
+elements.copyButton.addEventListener("click", copySign);
 elements.downloadButton.addEventListener("click", downloadSign);
 
 const previewResizeObserver = new ResizeObserver(scheduleSignRender);
