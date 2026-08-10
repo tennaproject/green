@@ -1,6 +1,7 @@
 {
   "name": "green",
   "private": true,
+  "license": "Zlib",
   "packageManager": "bun@1.3.14",
   "scripts": {
     "build": "bun run scripts/build.ts",
