@@ -32,9 +32,7 @@
 
 :root {
   --shell: oklch(0.93 0.04 84);
-  --surface-hover: oklch(0.65 0.15 140);
   --line: oklch(0.225 0.064 151);
-  --text: oklch(0.96 0.047 88);
   --ink: oklch(0.255 0.068 148);
   --muted: oklch(0.47 0.066 144);
   --accent: oklch(0.80 0.19 128);
@@ -105,9 +103,10 @@ button {
 .label-row {
   display: flex;
   min-inline-size: 0;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   color: var(--ink);
   font-size: 1rem;
   line-height: 1;
@@ -115,6 +114,95 @@ button {
 
 .label-row label {
   font-weight: 700;
+}
+
+.label-row-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+}
+
+.segmented-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border: 0;
+  border-inline-end: 1px solid var(--line);
+  cursor: pointer;
+  min-block-size: 2rem;
+  padding-inline: 0.625rem;
+  color: var(--ink);
+  background: var(--paper-highlight);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.segmented-button:last-child {
+  border-inline-end: 0;
+}
+
+.segmented-button:hover {
+  color: var(--ink);
+  background: var(--accent-hover);
+}
+
+.segmented-button:active {
+  color: var(--ink);
+  background: var(--accent);
+}
+
+.segmented-button[aria-pressed="true"] {
+  color: var(--ink);
+  background: var(--accent);
+}
+
+.segmented-button[aria-pressed="true"]:hover {
+  color: var(--ink);
+  background: var(--accent-hover);
+}
+
+.segmented-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.segmented-button::before {
+  content: "";
+  flex: 0 0 auto;
+  inline-size: 1rem;
+  block-size: 1rem;
+  background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+#side-left-button {
+  --icon: url("assets/icons/arrow-left.svg");
+}
+
+#side-right-button {
+  --icon: url("assets/icons/arrow-left.svg");
+  flex-direction: row-reverse;
+}
+
+#side-right-button::before {
+  transform: scaleX(-1);
+}
+
+#mood-happy-button {
+  --icon: url("assets/icons/mood-happy.svg");
+}
+
+#mood-sad-button {
+  --icon: url("assets/icons/mood-sad.svg");
 }
 
 #character-count {
@@ -166,9 +254,15 @@ textarea:focus-visible {
 }
 
 .pixel-export-option:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  border-color: var(--text);
+  color: var(--ink);
+  background: var(--accent-hover);
+  border-color: var(--line);
+}
+
+.pixel-export-option:active {
+  color: var(--ink);
+  background: var(--accent);
+  border-color: var(--line);
 }
 
 .pixel-export-option:has(input:focus-visible) {
@@ -200,9 +294,15 @@ textarea:focus-visible {
 }
 
 .toolbar-button:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  border-color: var(--text);
+  color: var(--ink);
+  background: var(--accent-hover);
+  border-color: var(--line);
+}
+
+.toolbar-button:active {
+  color: var(--ink);
+  background: var(--accent);
+  border-color: var(--line);
 }
 
 .toolbar-button-primary {
@@ -214,6 +314,12 @@ textarea:focus-visible {
 .toolbar-button-primary:hover {
   color: var(--ink);
   background: var(--accent-hover);
+  border-color: var(--line);
+}
+
+.toolbar-button-primary:active {
+  color: var(--ink);
+  background: var(--accent);
   border-color: var(--line);
 }
 
@@ -230,15 +336,6 @@ textarea:focus-visible {
   background: currentColor;
   -webkit-mask: var(--icon) center / contain no-repeat;
   mask: var(--icon) center / contain no-repeat;
-}
-
-#side-button {
-  --icon: url("assets/icons/arrow-left.svg");
-  margin-inline-end: auto;
-}
-
-#side-button[data-direction="right"]::before {
-  transform: scaleX(-1);
 }
 
 #reset-button {

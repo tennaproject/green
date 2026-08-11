@@ -18,8 +18,10 @@ const elements = {
   signCopy: document.querySelector("#sign-copy"),
   character: document.querySelector("#character-sprite"),
   pixelExport: document.querySelector("#pixel-export"),
-  sideButton: document.querySelector("#side-button"),
-  sideButtonLabel: document.querySelector("#side-button-label"),
+  sideLeftButton: document.querySelector("#side-left-button"),
+  sideRightButton: document.querySelector("#side-right-button"),
+  moodHappyButton: document.querySelector("#mood-happy-button"),
+  moodSadButton: document.querySelector("#mood-sad-button"),
   resetButton: document.querySelector("#reset-button"),
   copyButton: document.querySelector("#copy-button"),
   downloadButton: document.querySelector("#download-button"),
@@ -27,6 +29,7 @@ const elements = {
 
 let signRenderFrame;
 let characterSide = "right";
+let characterMood = "happy";
 let previewScale = 1;
 
 function updateSign() {
@@ -99,19 +102,26 @@ function setCharacterSide(side) {
   characterSide = side === "left" ? "left" : "right";
 
   elements.scene.dataset.characterSide = characterSide;
-  const direction = characterSide === "right" ? "left" : "right";
-  elements.sideButton.dataset.direction = direction;
-  elements.sideButtonLabel.textContent = `Move to ${direction}`;
+  const left = characterSide === "left";
+  elements.sideLeftButton.setAttribute("aria-pressed", String(left));
+  elements.sideRightButton.setAttribute("aria-pressed", String(!left));
   scheduleSignRender();
 }
 
-function toggleCharacterSide() {
-  setCharacterSide(characterSide === "right" ? "left" : "right");
+function setCharacterMood(mood) {
+  characterMood = mood === "sad" ? "sad" : "happy";
+  elements.character.src = characterMood === "sad"
+    ? "assets/green-sad.svg"
+    : "assets/green.svg";
+  const sad = characterMood === "sad";
+  elements.moodHappyButton.setAttribute("aria-pressed", String(!sad));
+  elements.moodSadButton.setAttribute("aria-pressed", String(sad));
 }
 
 function resetSign() {
   elements.text.value = DEFAULT_TEXT;
   setCharacterSide("right");
+  setCharacterMood("happy");
   updateSign();
   elements.text.focus();
 }
@@ -296,7 +306,10 @@ async function downloadSign() {
 }
 
 elements.text.addEventListener("input", updateSign);
-elements.sideButton.addEventListener("click", toggleCharacterSide);
+elements.sideLeftButton.addEventListener("click", () => setCharacterSide("left"));
+elements.sideRightButton.addEventListener("click", () => setCharacterSide("right"));
+elements.moodHappyButton.addEventListener("click", () => setCharacterMood("happy"));
+elements.moodSadButton.addEventListener("click", () => setCharacterMood("sad"));
 elements.resetButton.addEventListener("click", resetSign);
 elements.copyButton.addEventListener("click", copySign);
 elements.downloadButton.addEventListener("click", downloadSign);
@@ -306,4 +319,5 @@ previewResizeObserver.observe(elements.previewStage);
 
 document.fonts.ready.then(updateSign);
 setCharacterSide("right");
+setCharacterMood("happy");
 updateSign();

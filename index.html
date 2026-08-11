@@ -77,13 +77,20 @@
       <section class="control-panel">
         <div class="label-row">
           <label for="sign-text">Sign text</label>
+          <div class="label-row-controls">
+            <div class="segmented" role="group" aria-label="Character side">
+              <button id="side-left-button" class="segmented-button" type="button" aria-pressed="false">Left</button>
+              <button id="side-right-button" class="segmented-button" type="button" aria-pressed="true">Right</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Character mood">
+              <button id="mood-happy-button" class="segmented-button" type="button" aria-pressed="true">Happy</button>
+              <button id="mood-sad-button" class="segmented-button" type="button" aria-pressed="false">Sad</button>
+            </div>
+          </div>
           <span id="character-count">12 characters</span>
         </div>
         <textarea id="sign-text">Write something green...</textarea>
         <div class="compact-actions">
-          <button id="side-button" class="toolbar-button">
-            <span id="side-button-label">Move to left</span>
-          </button>
           <label class="pixel-export-option" for="pixel-export">
             <input id="pixel-export" type="checkbox">
             <span>Native pixel PNG</span>
