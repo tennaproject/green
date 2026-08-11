@@ -2,9 +2,26 @@ import { paintSign, renderSign } from "./sign-renderer.js";
 
 const DEFAULT_TEXT = 'Write something green...';
 const ART_PIXEL_SIZE = 3;
+const DEFAULT_FONT = "green-sans";
+const BUNDLED_FONTS = ["green-sans", "departure-mono", "pixel-operator"];
 
-function formatGreenSansText(text) {
-  return text.replaceAll(" ", "  ");
+// Linux users may not have all of these fonts, so there must be fallback
+const SYSTEM_FONTS = [
+  { family: "Comic Sans MS", fallback: "cursive" },
+  { family: "Papyrus", fallback: "fantasy" },
+  { family: "Wingdings", fallback: "fantasy" },
+  { family: "Impact", fallback: "sans-serif" },
+  { family: "Brush Script MT", fallback: "cursive" },
+  { family: "Courier New", fallback: "monospace" },
+  { family: "Georgia", fallback: "serif" },
+  { family: "Times New Roman", fallback: "serif" },
+  { family: "Trebuchet MS", fallback: "sans-serif" },
+  { family: "Verdana", fallback: "sans-serif" },
+];
+
+// Green Sans space glyph is very narrow, so adding another space is needed
+function formatSignText(text) {
+  return signFont === "green-sans" ? text.replaceAll(" ", "  ") : text;
 }
 
 const elements = {
@@ -22,6 +39,8 @@ const elements = {
   sideRightButton: document.querySelector("#side-right-button"),
   moodHappyButton: document.querySelector("#mood-happy-button"),
   moodSadButton: document.querySelector("#mood-sad-button"),
+  fontSelect: document.querySelector("#sign-font"),
+  systemFontGroup: document.querySelector("#system-font-group"),
   resetButton: document.querySelector("#reset-button"),
   copyButton: document.querySelector("#copy-button"),
   downloadButton: document.querySelector("#download-button"),
@@ -30,11 +49,12 @@ const elements = {
 let signRenderFrame;
 let characterSide = "right";
 let characterMood = "happy";
+let signFont = DEFAULT_FONT;
 let previewScale = 1;
 
 function updateSign() {
   const text = elements.text.value;
-  elements.signCopy.textContent = formatGreenSansText(text);
+  elements.signCopy.textContent = formatSignText(text);
   elements.count.textContent = `${text.length} ${text.length === 1 ? "character" : "characters"}`;
   scheduleSignRender();
 }
@@ -118,11 +138,55 @@ function setCharacterMood(mood) {
   elements.moodSadButton.setAttribute("aria-pressed", String(sad));
 }
 
+// font detection brain rot
+function fontIsInstalled(family) {
+  const context = document.createElement("canvas").getContext("2d");
+  const sample = "WimM@1l";
+
+  return ["monospace", "serif"].some((generic) => {
+    context.font = `72px "${family}", ${generic}`;
+    const withFamily = context.measureText(sample).width;
+    context.font = `72px ${generic}`;
+    return withFamily !== context.measureText(sample).width;
+  });
+}
+
+function buildSystemFontOptions() {
+  elements.systemFontGroup.replaceChildren(
+    ...SYSTEM_FONTS.map(({ family, fallback }) => {
+      const option = document.createElement("option");
+      const installed = fontIsInstalled(family);
+      option.value = `system:${family}`;
+      option.textContent = installed ? family : `${family} (not installed)`;
+      option.disabled = !installed;
+      option.dataset.stack = `"${family}", ${fallback}`;
+      return option;
+    }),
+  );
+}
+
+function setSignFont(font) {
+  const system = typeof font === "string" && font.startsWith("system:");
+  signFont = system || BUNDLED_FONTS.includes(font) ? font : DEFAULT_FONT;
+  elements.fontSelect.value = signFont;
+
+  if (system) {
+    const option = elements.fontSelect.selectedOptions[0];
+    elements.signCopy.dataset.font = "system";
+    elements.signCopy.style.setProperty("--font-sign", option.dataset.stack);
+  } else {
+    elements.signCopy.dataset.font = signFont;
+    elements.signCopy.style.removeProperty("--font-sign");
+  }
+
+  updateSign();
+}
+
 function resetSign() {
   elements.text.value = DEFAULT_TEXT;
   setCharacterSide("right");
   setCharacterMood("happy");
-  updateSign();
+  setSignFont(DEFAULT_FONT);
   elements.text.focus();
 }
 
@@ -198,7 +262,7 @@ async function createExportCanvas(scale = 2) {
     paintSign(context, signX, signY, signRect.width, signRect.height);
   }
 
-  const value = formatGreenSansText(elements.text.value);
+  const value = formatSignText(elements.text.value);
   if (value) {
     const fontSize = Number.parseFloat(copyStyle.fontSize) || 32;
     const lineHeight = Number.parseFloat(copyStyle.lineHeight) || fontSize * 1.36;
@@ -310,6 +374,9 @@ elements.sideLeftButton.addEventListener("click", () => setCharacterSide("left")
 elements.sideRightButton.addEventListener("click", () => setCharacterSide("right"));
 elements.moodHappyButton.addEventListener("click", () => setCharacterMood("happy"));
 elements.moodSadButton.addEventListener("click", () => setCharacterMood("sad"));
+elements.fontSelect.addEventListener("change", () =>
+  setSignFont(elements.fontSelect.value),
+);
 elements.resetButton.addEventListener("click", resetSign);
 elements.copyButton.addEventListener("click", copySign);
 elements.downloadButton.addEventListener("click", downloadSign);
@@ -320,4 +387,5 @@ previewResizeObserver.observe(elements.previewStage);
 document.fonts.ready.then(updateSign);
 setCharacterSide("right");
 setCharacterMood("happy");
-updateSign();
+buildSystemFontOptions();
+setSignFont(DEFAULT_FONT);
