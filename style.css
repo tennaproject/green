@@ -66,6 +66,7 @@ body {
 }
 
 button,
+select,
 textarea {
   font: inherit;
 }
@@ -120,6 +121,7 @@ button {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  min-inline-size: 0;
   gap: 0.5rem;
 }
 
@@ -203,6 +205,39 @@ button {
 
 #mood-sad-button {
   --icon: url("assets/icons/mood-sad.svg");
+}
+
+.font-select {
+  appearance: none;
+  display: inline-flex;
+  min-block-size: 2.125rem;
+  padding-inline: 0.625rem 1.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--paper-highlight);
+  background-image: url("assets/icons/chevron-down.svg");
+  background-repeat: no-repeat;
+  background-position: right 0.375rem center;
+  background-size: 1rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.font-select:hover {
+  color: var(--ink);
+  background-color: var(--accent-hover);
+}
+
+.font-select:focus-visible {
+  outline: 2px solid var(--line);
+  outline-offset: 2px;
+}
+
+.font-select option:disabled {
+  color: var(--muted);
 }
 
 #character-count {
@@ -505,6 +540,24 @@ footer img {
   inset-inline-end: auto;
   inline-size: var(--character-size);
   transform: none;
+}
+
+.sign-copy[data-font="green-sans"] {
+  --font-sign: "Green Sans", ui-monospace, monospace;
+}
+
+.sign-copy[data-font="departure-mono"] {
+  --font-sign: "Departure Mono", ui-monospace, monospace;
+}
+
+.sign-copy[data-font="pixel-operator"] {
+  --font-sign: "Pixel Operator Mono", ui-monospace, monospace;
+  font-size: 32px;
+}
+
+/* --font-sign comes from the picked option's inline style */
+.sign-copy[data-font="system"] {
+  font-size: 30px;
 }
 
 .sign-copy {
